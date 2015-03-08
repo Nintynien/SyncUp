@@ -32,6 +32,12 @@ namespace SyncUp
 
         #region json_response_definition_section
 
+        public const int ERR_GENERAL_EXCEPTION = 500;
+        public const int ERR_HTTP_EXCEPTION = 501;
+        public const int ERR_SUCCESS = 200;
+        public const int ERR_INVALID_USER_PASS = 203;
+        public const int ERR_INVALID_GUID = 206;
+
         [DataContract]
         public class ApiJsonResp
         {
@@ -315,50 +321,6 @@ namespace SyncUp
             }
         }
 
-        public const int MAX_INVITE_COUNT = 1000;
-
-        public const int ERR_GENERAL_EXCEPTION = 900;
-        public const int ERR_HTTP_EXCEPTION = 901;
-        public const int ERR_INVALID_ARG = -1;
-        public const int ERR_INVALID_APP_ID = -2;
-        public const int ERR_SUCCESS = 200;
-        public const int ERR_INVALID_ID_PW = 203;
-        public const int ERR_DUP_EMAIL_IN_ORG = 209;
-        public const int ERR_DUP_EMAIL_OUT_ORG = 210;
-        public const int ERR_DIRTY_EMAIL = 211;
-        public const int ERR_NOT_ORG_ADMIN = 400;
-        public const int ERR_ORG_EMAIL_FULL = 418;
-        public const int ERR_INVALID_EMAIL = 415;
-
-        public static Dictionary<int, string> TPErrorMessage = new Dictionary<int, string>()
-        {
-            { ERR_GENERAL_EXCEPTION, "System exception occurred."},
-            { ERR_HTTP_EXCEPTION,    "Unable to connect to server."},
-            { ERR_INVALID_ARG,       "Invlid Arguments."},
-            { ERR_INVALID_APP_ID,    "Invlid App ID."},
-            { ERR_INVALID_ID_PW,     "The email address and password combination does not match any known Transporter Administrator account."},
-            { ERR_DUP_EMAIL_IN_ORG,  "A user with this email address is already in your Organization."},
-            { ERR_DUP_EMAIL_OUT_ORG, "This email address already belongs to a Transporter user outside of this Organization."},
-            { ERR_DIRTY_EMAIL,       "The email address is flagged as unsafe."},
-            { ERR_NOT_ORG_ADMIN,     "The email and password combination must match an Organization Admin’s credentials."},
-            { ERR_ORG_EMAIL_FULL,    "You have reached the 1,000 users per Organization limit."},
-            { ERR_INVALID_EMAIL,     "Invalid email format."}
-        };
-
-        public static string GetErrorMessage(int errCode)
-        {
-            string errMsg = "Unknown Error";
-            if (TPErrorMessage.ContainsKey(errCode))
-            {
-                errMsg = TPErrorMessage[errCode];
-            }
-            else
-            {
-                errMsg += " [" + errCode.ToString() + "]";
-            }
-            return errMsg;
-        }
-
         public static bool ValidateEmail(string email)
         {
             const string emailReg = @"^([A-Za-z0-9_\-\.])+\@([A-Za-z0-9_\-\.])+\.([A-Za-z]{2,})$";
@@ -373,77 +335,5 @@ namespace SyncUp
         }
 
         #endregion // util_section
-
-        #region update_section
-
-        public static Version AvailableVersion;
-        public static string DownloadURL;
-        public static string ChangeLogURL;
-
-        public static string GetUpdateVersion()
-        {
-            string updateversion = "";
-            string thisversion = Assembly.GetExecutingAssembly().GetName().Version.ToString();
-            Version InstalledVersion = new Version(thisversion);
-
-    #if DEBUG
-            string url = "http://localhost/updates.xml";
-    #else
-            string url = "http://appsoftware.connecteddata.com/tdconnector/updates.xml";
-    #endif
-
-            string respXml = "";
-            int retCode = GetHttpGetQuery(url, ref respXml);
-            if (retCode != 200 || respXml.Length == 0)
-            {
-                Trace.WriteLine("GetUpdateVersion() error : " + retCode.ToString());
-                return updateversion;
-            }
-
-            try
-            {
-                XmlDocument receivedAppCastDocument = new XmlDocument();
-                receivedAppCastDocument.LoadXml(respXml);
-
-                XmlNodeList appCastItems = receivedAppCastDocument.SelectNodes("item");
-                if (appCastItems != null)
-                {
-                    foreach (XmlNode item in appCastItems)
-                    {
-                        XmlNode appCastVersion = item.SelectSingleNode("version");
-                        if (appCastVersion != null)
-                        {
-                            String appVersion = appCastVersion.InnerText;
-                            Version version = new Version(appVersion);
-                            if (version <= InstalledVersion)
-                            {
-                                Trace.WriteLine("GetUpdateVersion() Ignore Update : this=" + InstalledVersion.ToString() + " there=" + version.ToString());
-                                continue;
-                            }
-                            AvailableVersion = version;
-                            updateversion = AvailableVersion.ToString();
-                        }
-                        else
-                            continue;
-
-                        XmlNode appCastTitle = item.SelectSingleNode("title");
-
-                        XmlNode appCastChangeLog = item.SelectSingleNode("changelog");
-                        ChangeLogURL = appCastChangeLog != null ? appCastChangeLog.InnerText : "";
-
-                        XmlNode appCastUrl = item.SelectSingleNode("url");
-                        DownloadURL = appCastUrl != null ? appCastUrl.InnerText : "";
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                Trace.WriteLine("GetUpdateVersion() Exception : err=" + ex.Message);
-            }
-
-            return updateversion;
-        }
-
-        #endregion // update_section
     }
 }
