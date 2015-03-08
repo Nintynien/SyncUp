@@ -67,6 +67,47 @@ function getGuid()
 	}
 }
 
+// Registers a user
+function registerUser($username, $password, $email)
+{
+	if(empty($username) || empty($password))
+	{
+		return json_encode(status(400, "Invalid Parameters"));
+	}
+	
+	//Connect to Database
+	$connectionOptions = array("Database"=>"SyncUp", "UID"=>"test", "PWD"=>"test");
+
+	$conn = sqlsrv_connect("localhost", $connectionOptions);
+	if ($conn === false) {
+		die(print_r( sqlsrv_errors(), true));
+	}
+	
+	//Check if username is available
+	$sql = "SELECT userid FROM Users WHERE username = ?";
+	$stmt = sqlsrv_query(&$conn, $sql, array( &$username));
+	if( $stmt === false) {
+		return json_encode(status(500, sqlsrv_errors()));
+	}
+
+	if(sqlsrv_has_rows($stmt) === false)
+	{
+		// Username is available, insert it into the database
+		$salt = "1234567890";
+
+		$sql = "INSERT INTO Users (username, password, salt, email) VALUES (?, ?, ?, ?)";
+		$stmt = sqlsrv_query(&$conn, $sql, array( &$username, &$password, &$salt, &$email));
+		if( $stmt === false) {
+			return json_encode(status(501, sqlsrv_errors()));
+		}
+		return json_encode(status(200, "Success"));
+	}
+	else
+	{
+		return json_encode(status(203, "Non-Authoritative Information"));
+	}
+}
+
 // for testing
 function authenticate($username, $password)
 {
