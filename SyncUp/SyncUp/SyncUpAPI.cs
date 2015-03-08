@@ -104,7 +104,7 @@ namespace SyncUp
 
         public static int LoginApp(string username, string pw, string url = null)
         {
-            if (username == null || username.Length == 0) return ERR_INVALID_ARG;
+            if (username == null || username.Length == 0) return ERR_GENERAL_EXCEPTION;
             if (pw == null) pw = "";
             if (url == null) url = GetApiURL();
 
