@@ -39,15 +39,21 @@ namespace SyncUp
         public const int ERR_INVALID_GUID = 206;
 
         [DataContract]
-        public class ApiJsonResp
+        public class ApiJsonAppRegResp
         {
             [DataMember(Name = "code")]
             public int code { get; set; }
             [DataMember(Name = "response")]
             public string response { get; set; }
+        }
 
-            // source json response
-            public string jsonResp;
+        [DataContract]
+        public class ApiJsonUserRegResp
+        {
+            [DataMember(Name = "code")]
+            public int code { get; set; }
+            [DataMember(Name = "response")]
+            public string response { get; set; }
         }
 
         [DataContract]
@@ -69,21 +75,21 @@ namespace SyncUp
 
         #region tp_request_section
 
-        public static ApiJsonResp RegisterAppInstance(string username, string password, string guid)
+        public static ApiJsonAppRegResp RegisterAppInstance(string username, string password, string guid)
         {
-            ApiJsonResp resp = null;
+            ApiJsonAppRegResp resp = null;
 
             int code = GetRegisterAppInstance(ref resp, null, username, password, guid);
 
             if (code != ERR_SUCCESS)
             {
-                Console.WriteLine("Error - RegisterAppInstance - code: " + code + " resp:" + resp.jsonResp);
+                Console.WriteLine("Error - RegisterAppInstance - code: " + code);
             }
 
             return resp;
         }
 
-        public static int GetRegisterAppInstance(ref ApiJsonResp resp, string url, string username, string password, string guid, string client_name = "SyncUp - Windows Client")
+        public static int GetRegisterAppInstance(ref ApiJsonAppRegResp resp, string url, string username, string password, string guid, string client_name = "SyncUp - Windows Client")
         {
             if (url == null) url = GetApiURL();
 
@@ -92,7 +98,40 @@ namespace SyncUp
             resp = null;
 
             int retCode = GetHttpPostQuery(url + "/apps.php/register", msg, ref respjson);
-            resp = Deserialize<ApiJsonResp>(respjson);
+            resp = Deserialize<ApiJsonAppRegResp>(respjson);
+
+            if (retCode == ERR_SUCCESS)
+            {
+                return resp.code;
+            }
+
+            return retCode;
+        }
+
+        public static ApiJsonUserRegResp RegisterUser(string username, string password, string email)
+        {
+            ApiJsonUserRegResp resp = null;
+
+            int code = GetRegisterUser(ref resp, null, username, password, email);
+
+            if (code != ERR_SUCCESS)
+            {
+                Console.WriteLine("Error - RegisterAppInstance - code: " + code);
+            }
+
+            return resp;
+        }
+
+        public static int GetRegisterUser(ref ApiJsonUserRegResp resp, string url, string username, string password, string email)
+        {
+            if (url == null) url = GetApiURL();
+
+            string msg = "{\"username\":\"" + username + "\",\"password\":\"" + password + "\",\"email\":\"" + email + "\"}";
+            string respjson = "";
+            resp = null;
+
+            int retCode = GetHttpPostQuery(url + "/users.php/register", msg, ref respjson);
+            resp = Deserialize<ApiJsonUserRegResp>(respjson);
 
             if (retCode == ERR_SUCCESS)
             {
@@ -121,7 +160,7 @@ namespace SyncUp
             AppGlobals.AppGUID = guid; // save app guid
 
             //REGISTER GUID to user
-            ApiJsonResp regResp = RegisterAppInstance(username, pw, guid);
+            ApiJsonAppRegResp regResp = RegisterAppInstance(username, pw, guid);
 
             if (regResp == null)
             {

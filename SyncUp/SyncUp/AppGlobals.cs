@@ -31,6 +31,23 @@ namespace SyncUp
             loginform.Show();
         }
 
+        public static SyncUpError Register(string username, string password, string email = null)
+        {
+            if (username == null || password == null)
+            {
+                return SyncUpError.BadParams;
+            }
+
+            SyncUpAPI.ApiJsonUserRegResp resp = SyncUpAPI.RegisterUser(username, password, email);
+
+            if (resp.code != SyncUpAPI.ERR_SUCCESS)
+            {
+                return SyncUpError.Unknown;
+            }
+
+            return SyncUpError.None;
+        }
+
         public static SyncUpError Login(string username, string password)
         {
             if (username == null || password == null)

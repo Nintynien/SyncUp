@@ -81,7 +81,7 @@
             // 
             // buttonRegister
             // 
-            this.buttonRegister.Location = new System.Drawing.Point(164, 62);
+            this.buttonRegister.Location = new System.Drawing.Point(83, 62);
             this.buttonRegister.Name = "buttonRegister";
             this.buttonRegister.Size = new System.Drawing.Size(75, 23);
             this.buttonRegister.TabIndex = 7;
@@ -95,7 +95,7 @@
             this.AcceptButton = this.buttonLogin;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(246, 92);
+            this.ClientSize = new System.Drawing.Size(242, 88);
             this.ControlBox = false;
             this.Controls.Add(this.buttonRegister);
             this.Controls.Add(this.buttonLogin);

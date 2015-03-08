@@ -39,7 +39,7 @@ namespace SyncUp
                     textBoxUsername.Enabled = true;
                     textBoxPassword.Enabled = true;
                     buttonLogin.Visible = true;
-                    buttonRegister.Visible = false;
+                    buttonRegister.Visible = true;
                     break;
                 }
                 case LoginFormType.Reauthenticate:
@@ -64,14 +64,43 @@ namespace SyncUp
             }
         }
 
+        private void disableInput()
+        {
+            textBoxPassword.Enabled = false;
+            textBoxUsername.Enabled = false;
+            buttonLogin.Enabled = false;
+            buttonRegister.Enabled = false;
+        }
+
+        private void enableInput()
+        {
+            textBoxPassword.Enabled = true;
+            textBoxUsername.Enabled = true;
+            buttonLogin.Enabled = true;
+            buttonRegister.Enabled = true;
+        }
+
         private void buttonRegister_Click(object sender, EventArgs e)
         {
-
+            TopMost = false;
+            disableInput();
+            AppGlobals.SyncUpError error = AppGlobals.Register(textBoxUsername.Text, textBoxPassword.Text);
+            if (error != AppGlobals.SyncUpError.None)
+            {
+                MessageBox.Show("Error Registering! Error:" + error);
+            }
+            else
+            {
+                // Successful register, login
+                buttonLogin_Click(sender, e);
+            }
+            enableInput();
         }
 
         private void buttonLogin_Click(object sender, EventArgs e)
         {
             TopMost = false;
+            disableInput();
             AppGlobals.SyncUpError error = AppGlobals.Login(textBoxUsername.Text, textBoxPassword.Text);
             if (error != AppGlobals.SyncUpError.None)
             {
@@ -82,6 +111,7 @@ namespace SyncUp
                 // Successful login, close the form
                 this.Close();
             }
+            enableInput();
         }
     }
 }
