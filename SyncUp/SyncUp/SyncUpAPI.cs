@@ -57,6 +57,15 @@ namespace SyncUp
         }
 
         [DataContract]
+        public class ApiJsonSendMsgResp
+        {
+            [DataMember(Name = "code")]
+            public int code { get; set; }
+            [DataMember(Name = "response")]
+            public string response { get; set; }
+        }
+
+        [DataContract]
         public class ApiJsonUUIDResp
         {
             [DataMember(Name = "guid")]
@@ -132,6 +141,39 @@ namespace SyncUp
 
             int retCode = GetHttpPostQuery(url + "/users.php/register", msg, ref respjson);
             resp = Deserialize<ApiJsonUserRegResp>(respjson);
+
+            if (retCode == ERR_SUCCESS)
+            {
+                return resp.code;
+            }
+
+            return retCode;
+        }
+
+        public static ApiJsonSendMsgResp SendMessage(string appguid, string token, string to_userid, string message)
+        {
+            ApiJsonSendMsgResp resp = null;
+
+            int code = PostSendMessage(ref resp, null, appguid, token, to_userid, message);
+
+            if (code != ERR_SUCCESS)
+            {
+                Console.WriteLine("Error - SendMessage - code: " + code);
+            }
+
+            return resp;
+        }
+
+        public static int PostSendMessage(ref ApiJsonSendMsgResp resp, string url, string appid, string token, /*send message to*/ string userid, string message)
+        {
+            if (url == null) url = GetApiURL();
+
+            string msg = "{\"appid\":\"" + appid + "\",\"token\":\"" + token + "\",\"userid\":\"" + userid + "\",\"msg\":\"" + message + "\"}";
+            string respjson = "";
+            resp = null;
+
+            int retCode = GetHttpPostQuery(url + "/apps.php/send", msg, ref respjson);
+            resp = Deserialize<ApiJsonSendMsgResp>(respjson);
 
             if (retCode == ERR_SUCCESS)
             {

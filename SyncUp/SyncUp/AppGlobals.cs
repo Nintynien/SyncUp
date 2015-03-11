@@ -20,15 +20,59 @@ namespace SyncUp
             Unknown
         }
 
-        public static string AppGUID = null;
-        public static string Token = null;
-        public static string Username = null;
-        public static string Password = null;
+        public class User
+        {
+            public string first_name;
+            public string last_name;
+            public string userid;
+            
+            public User(string first_name, string last_name, string userid) {
+                this.first_name = first_name;
+                this.last_name = last_name;
+                this.userid = userid;
+            }
+
+            public override string ToString() {
+                // Generates the text shown in the combo box
+                return getDisplayName();
+            }
+
+            public string getDisplayName()
+            {
+                return first_name + " " + last_name;
+            }
+        }
+
+        public static string AppGUID = "8F701225-6C9F-433E-A9AA-A1ACF1DA7AC6";
+        public static string Token = "JgVDeh57nns1LI38GeFQLCen+xdUARJM";
+        public static string Username = "test";
+        public static string Password = "test";
+        public static List<User> Users = new List<User>();
 
         public static void StartApplication()
         {
-            LoginForm loginform = new LoginForm();
-            loginform.Show();
+            Console.WriteLine("Starting Application");
+#if DEBUG
+            Users.Add(new User("test", "user", "B2F0B803-06BF-E411-940C-A0B3CCE17F1E"));
+            Users.Add(new User("test2", "user2", "B2F0B803-06BF-E411-940C-A0B3CCE17F1E"));
+#endif
+            if (AppGUID != null && Token != null)
+            {
+                // TODO:
+                // Attempt to log in and verify the account.
+                // If login fails, clear GUID and Token so the user is required to log in again
+            }
+
+            if (AppGUID == null && Token == null)
+            {
+                LoginForm loginform = new LoginForm();
+                loginform.Show();
+            }
+
+            MainForm.mainform.updateForm();
+            MainForm.mainform.updateUsers();
+
+            Console.WriteLine("Finished Starting Application");
         }
 
         public static SyncUpError Register(string username, string password, string email = null)

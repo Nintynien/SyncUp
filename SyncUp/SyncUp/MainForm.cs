@@ -28,10 +28,44 @@ namespace SyncUp
             textBoxUsername.Text = AppGlobals.Username;
         }
 
+        public void updateUsers()
+        {
+            comboBoxUser.Items.Clear();
+            foreach (AppGlobals.User user in AppGlobals.Users)
+            {
+                comboBoxUser.Items.Add(user);
+            }
+        }
+
         private void MainForm_Shown(object sender, EventArgs e)
         {
             // Start the application
             AppGlobals.StartApplication();
+        }
+
+        private void buttonSend_Click(object sender, EventArgs e)
+        {
+            string message = textBoxMessage.Text;
+            string userid = ((AppGlobals.User)comboBoxUser.SelectedItem).userid;
+            SyncUpAPI.ApiJsonSendMsgResp resp = SyncUpAPI.SendMessage(AppGlobals.AppGUID, AppGlobals.Token, userid, message);
+            if (resp == null || resp.code != 200)
+            {
+                //Send failed!
+                ListViewItem lvi = new ListViewItem("Failed");
+                //lvi.SubItems.Add(new ListViewItem.ListViewSubItem().Text="Failed");
+                lvi.SubItems.Add(new ListViewItem.ListViewSubItem().Text=userid);
+                lvi.SubItems.Add(new ListViewItem.ListViewSubItem().Text=message);
+                lvMessages.Items.Add(lvi);
+            }
+            else
+            {
+                //Send success!
+                ListViewItem lvi = new ListViewItem("Success");
+                //lvi.SubItems.Add(new ListViewItem.ListViewSubItem().Text = "Success");
+                lvi.SubItems.Add(new ListViewItem.ListViewSubItem().Text = userid);
+                lvi.SubItems.Add(new ListViewItem.ListViewSubItem().Text = message);
+                lvMessages.Items.Add(lvi);
+            }
         }
     }
 }
