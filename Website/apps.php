@@ -38,18 +38,22 @@ function put($request)
 
 function post($request)
 {
-	//echo "POST";
-	//print_r($request);
 	$raw_data = file_get_contents("php://input");
 	if ($request[0] == "getuuid")
 	{
 		echo getGuid();
 		return;
 	}
+	elseif ($request[0] == "send")
+	{
+		$json = json_decode($raw_data);
+		echo sendMessage($json->appid, $json->token, $json->userid, $json->msg);
+		return;
+	}
 	elseif ($request[0] == "login")
 	{
-		echo "login";
-		echo authenticate("usera", "usera");
+		$json = json_decode($raw_data);
+		echo authenticate($json->appid, $json->token);
 	}
 	elseif ($request[0] == "register")
 	{

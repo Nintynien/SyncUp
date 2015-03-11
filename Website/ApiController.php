@@ -265,7 +265,7 @@ function verifyAppWithToken($appid, $token)
 		die(print_r( sqlsrv_errors(), true));
 	}
 	
-	$sql = "SELECT * FROM Applications WHERE appid = ? AND token = ?";
+	$sql = "SELECT appid, userid FROM Applications WHERE appid = ? AND token = ?";
 	$stmt = sqlsrv_query(&$conn, $sql, array( &$appid, &$token));
 	if( $stmt === false) {
 		return json_encode(status(500, sqlsrv_errors()));
@@ -291,9 +291,9 @@ function sendMessage($appid, $token, $userid, $msg)
 	}
 
 	$error = verifyAppWithToken($appid, $token);
-	if (error != 200)
+	if ($error != 200)
 	{
-		return json_encode(status(error, "error validating user"));
+		return json_encode(status($error, "error validating user"));
 	}
 	
 	//Connect to Database
@@ -304,12 +304,12 @@ function sendMessage($appid, $token, $userid, $msg)
 		die(print_r( sqlsrv_errors(), true));
 	}
 	
-	$sql = "INSERT INTO Messages (fromit, toid, msg) WHERE (SELECT userid FROM Applications WHERE appid = ? AND token = ?, ?, ?)";
+	$sql = "INSERT INTO Messages (fromid, toid, msg) VALUES ((SELECT userid FROM Applications WHERE appid = ? AND token = ?), ?, ?)";
 	$stmt = sqlsrv_query(&$conn, $sql, array( &$appid, &$token, &$userid, &$msg));
 	if( $stmt === false) {
 		return json_encode(status(500, sqlsrv_errors()));
 	}
-	return json_encode(success("Success"));
+	return json_encode(status(200, "Success"));
 }
 
 ?>
